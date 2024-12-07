@@ -3,15 +3,25 @@ import dotenv from "dotenv";
 import connectDB from "./infrastructure/database/mongoose";
 import userRoute from "./presentation/routes/user.route";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 
 dotenv.config();
 const app = express();
 
-app.use(express.json());
-app.use(express.urlencoded({extended:true}))
-app.use(cookieParser())
-app.use("/api/users",userRoute)
+const allowedOrigins = process.env.CLIENT_ORIGINS;
 
+app.use(
+  cors({
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use("/api/users", userRoute);
 
 const PORT = process.env.PORT;
 
