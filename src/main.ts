@@ -1,15 +1,19 @@
-import express, { Request, Response } from "express";
+import express from "express";
 import dotenv from "dotenv";
 import connectDB from "./infrastructure/database/mongoose";
+import userRoute from "./presentation/routes/user.route";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 const app = express();
-app.use(express.json());
-const PORT = process.env.PORT;
 
-app.get("/api/test", (req: Request, res: Response) => {
-  res.status(200).json({ message: "Hello from the server!" });
-});
+app.use(express.json());
+app.use(express.urlencoded({extended:true}))
+app.use(cookieParser())
+app.use("/api/users",userRoute)
+
+
+const PORT = process.env.PORT;
 
 connectDB()
   .then(() => {
