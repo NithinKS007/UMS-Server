@@ -1,10 +1,10 @@
 import { UserRepository } from "../interface/user.repository";
 import { User } from "../../domain/entity/user.entity";
-import { createUserDTO } from "../dto/user.dto";
+import { userDTO } from "../dto/user.dto";
 
 export class CreateUserUseCase {
   constructor(private userRepository: UserRepository) {}
-  async execute(data: createUserDTO): Promise<User> {
+  async execute(data: userDTO): Promise<User> {
     return await this.userRepository.signup(data);
   }
 }

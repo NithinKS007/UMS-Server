@@ -1,86 +1,84 @@
 import { Request, Response } from "express";
 import { sendResponse } from "../../shared/utils/http.response";
 import { HTTP_STATUS_CODES } from "../../shared/constants/http.status.codes";
-import { hashPassword } from "../../shared/utils/hash.password";
 import { MongoUserRepository } from "../../infrastructure/repository/mongo.user.repository";
-import { CreateUserUseCase } from "../../application/usecase/create.user.usecase";
-import { FindUserByEmailUseCase } from "../../application/usecase/find.user.by.email.usecase";
-import { SigninUserUseCase } from "../../application/usecase/signin.user.usecase";
+import { FindUserByIdUseCase } from "../../application/usecase/find.user.by.id.usecase";
+import { UpdateUserUseCase } from "../../application/usecase/update.user.usecase";
+import { IuserAuthInfoRequest } from "../../application/dto/user.dto";
 
 const userRepository = new MongoUserRepository();
-const createUser  = new CreateUserUseCase(userRepository);
-const findUserByEmail = new FindUserByEmailUseCase(userRepository);
-const signinuser = new SigninUserUseCase(userRepository);
+const getuserProfile = new FindUserByIdUseCase(userRepository);
+const updateuserProfile = new UpdateUserUseCase(userRepository);
 
 export class UserController {
-  static async signup(req: Request, res: Response): Promise<void> {
+  static async getuserProfile(req: IuserAuthInfoRequest, res: Response): Promise<void> {
+    const user = req.user;
     try {
-      const existingUser = await findUserByEmail.execute(req.body.email);
-
-      if (existingUser) {
-        sendResponse(
-          res,
-          HTTP_STATUS_CODES.BAD_REQUEST,
-          existingUser,
-          "Email already exists"
-        );
+      if (!user) {
+        sendResponse(res, HTTP_STATUS_CODES.FORBIDDEN, null, "Access denied");
         return;
       }
-      const hashedPassword = await hashPassword(req.body.password);
 
-      const user = await createUser.execute({
-        ...req.body,
-        password: hashedPassword,
-      });
+      const userDetails = await getuserProfile.execute(user.id);
 
-      const { password, ...otherDetails } = user;
+      if (!userDetails) {
+        sendResponse(res, HTTP_STATUS_CODES.NOT_FOUND, null, "User not found");
+
+        return;
+      }
 
       sendResponse(
         res,
-        HTTP_STATUS_CODES.CREATED,
-        otherDetails,
-        "User created successfully"
+        HTTP_STATUS_CODES.ok,
+        userDetails,
+        "User data retrieved"
       );
-      return;
     } catch (error) {
-      console.log(`Error in user signup : ${error}`);
+      console.log(`Error in retrieving user details ${error}`);
 
       sendResponse(
         res,
         HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
         null,
-        "Failed to create user. Please try again"
+        "Cannot retrieve user details"
       );
     }
   }
 
-  static async signin(req: Request, res: Response): Promise<void> {
+  static async updateuserProfile(req: IuserAuthInfoRequest, res: Response): Promise<void> {
     try {
-      const { email, password } = req.body;
+      const user = req.user;
 
-      const user = await signinuser.execute({ email, password });
+      const userData = req.body;
 
       if (!user) {
-        sendResponse(
-          res,
-          HTTP_STATUS_CODES.BAD_REQUEST,
-          null,
-          "Invalid user data"
-        );
+        sendResponse(res, HTTP_STATUS_CODES.NOT_FOUND, null, "Access denied");
+
         return;
       }
 
-      const { password: _, ...otherDetails } = user;
+      const updateduser = await updateuserProfile.execute(userData, user.id);
 
-      sendResponse(res, HTTP_STATUS_CODES.ok, otherDetails, "Login successful");
+      if (!updateduser) {
+        sendResponse(res, HTTP_STATUS_CODES.FORBIDDEN, null, "user not found");
+
+        return;
+      }
+
+      sendResponse(
+        res,
+        HTTP_STATUS_CODES.ok,
+        updateduser,
+        "user updated success"
+      );
     } catch (error) {
-      console.log(`Error in signin user : ${error}`);
+      console.log(`Error in updating user details ${error}`);
 
       sendResponse(
         res,
         HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
         null,
-        "Failed to sign in. Please try again"
+        "Failed to update user details"
       );
     }
   }

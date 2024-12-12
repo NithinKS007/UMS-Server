@@ -4,7 +4,6 @@ import { UserRepository } from "../interface/user.repository";
 
 export class SigninUserUseCase {
   constructor(private userRepository: UserRepository) {}
-
   async execute(data: signinUserDTO): Promise<User | null> {
     return await this.userRepository.signin(data);
   }
