@@ -1,4 +1,4 @@
-import { Response, Request, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import { authenticateAccessToken } from "../../infrastructure/auth/jwt.service";
 import { sendResponse } from "../../shared/utils/http.response";
 import { HTTP_STATUS_CODES } from "../../shared/constants/http.status.codes";
@@ -7,7 +7,7 @@ import {
   UserPayLoadDTO,
 } from "../../application/dto/user.dto";
 
-const isAuthenticated = (
+export const isAuthenticated = (
   req: IuserAuthInfoRequest,
   res: Response,
   next: NextFunction
@@ -29,4 +29,26 @@ const isAuthenticated = (
   }
 };
 
-export default isAuthenticated;
+export const isUser = (
+  req: IuserAuthInfoRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  if (!req.user || req.user.role !== "user") {
+    sendResponse(res, HTTP_STATUS_CODES.FORBIDDEN, null, "Access denied");
+    return;
+  }
+  next();
+};
+
+export const isAdmin = (
+  req: IuserAuthInfoRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  if (!req.user || req.user.role !== "admin") {
+    sendResponse(res, HTTP_STATUS_CODES.FORBIDDEN, null, "Access denied");
+    return;
+  }
+  next();
+};

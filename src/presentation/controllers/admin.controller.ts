@@ -4,19 +4,24 @@ import { sendResponse } from "../../shared/utils/http.response";
 import { HTTP_STATUS_CODES } from "../../shared/constants/http.status.codes";
 import { FindUserByIdUseCase } from "../../application/usecase/find.user.by.id.usecase";
 import { UpdateUserUseCase } from "../../application/usecase/update.user.usecase";
-import { FindallUsers } from "../../application/usecase/find.all.users.usecase";
-import { DeleteUser } from "../../application/usecase/delete.user.usecase";
+import { FindallUsersUseCase } from "../../application/usecase/find.all.users.usecase";
+import { DeleteUserUseCase } from "../../application/usecase/delete.user.usecase";
 import { IuserAuthInfoRequest } from "../../application/dto/user.dto";
+import { SearchuserUseCase } from "../../application/usecase/search.user.usecase";
 
 const adminRepository = new MongoUserRepository();
 const getadminProfile = new FindUserByIdUseCase(adminRepository);
 const updateadminProfile = new UpdateUserUseCase(adminRepository);
-const findallUsers = new FindallUsers(adminRepository);
+const findallUsers = new FindallUsersUseCase(adminRepository);
 const updateuserProfile = new UpdateUserUseCase(adminRepository);
-const deleteuser = new DeleteUser(adminRepository);
+const deleteuser = new DeleteUserUseCase(adminRepository);
+const searchuser = new SearchuserUseCase(adminRepository);
 
 export class AdminController {
-  static async getadminProfile(req: IuserAuthInfoRequest, res: Response): Promise<void> {
+  static async getadminProfile(
+    req: IuserAuthInfoRequest,
+    res: Response
+  ): Promise<void> {
     try {
       const admin = req.user;
 
@@ -100,7 +105,10 @@ export class AdminController {
     }
   }
 
-  static async findallUsers(req: IuserAuthInfoRequest, res: Response): Promise<void> {
+  static async findallUsers(
+    req: IuserAuthInfoRequest,
+    res: Response
+  ): Promise<void> {
     try {
       const usersData = await findallUsers.execute();
 
@@ -129,7 +137,10 @@ export class AdminController {
     }
   }
 
-  static async updateuserDetails(req: IuserAuthInfoRequest, res: Response): Promise<void> {
+  static async updateuserDetails(
+    req: IuserAuthInfoRequest,
+    res: Response
+  ): Promise<void> {
     try {
       const user = req.user;
       const updatedUserData = req.body;
@@ -175,7 +186,10 @@ export class AdminController {
     }
   }
 
-  static async deleteuser(req: IuserAuthInfoRequest, res: Response): Promise<void> {
+  static async deleteuser(
+    req: IuserAuthInfoRequest,
+    res: Response
+  ): Promise<void> {
     try {
       const user = req.params;
 
@@ -214,6 +228,32 @@ export class AdminController {
         HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
         null,
         "Failed to delete user"
+      );
+    }
+  }
+
+  static async searchuser(
+    req: IuserAuthInfoRequest,
+    res: Response
+  ): Promise<void> {
+    try {
+
+      const searchQuery = req.query as { [key: string]: string }
+
+      const usersData = await searchuser.execute(searchQuery);
+
+      sendResponse(
+        res,
+        HTTP_STATUS_CODES.ok,
+        usersData,
+        "users data fetched successfully"
+      );
+    } catch (error) {
+      sendResponse(
+        res,
+        HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
+        null,
+        "Error while searching user"
       );
     }
   }

@@ -17,10 +17,14 @@ export type signinUserDTO = Pick<userDTO, "email" | "password">;
 
 export interface updateUserDTO extends Partial<userDTO> {}
 
-export interface  UserPayLoadDTO extends JwtPayload{
-  id:string,
-  role: UserRole
+export interface UserPayLoadDTO extends JwtPayload {
+  id: string;
+  role: UserRole;
 }
+// export interface searchTermDTO {
+//   searchText: string;
+// }
+
 export interface IuserAuthInfoRequest extends Request {
-  user?: UserPayLoadDTO; 
+  user?: UserPayLoadDTO;
 }

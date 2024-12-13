@@ -59,11 +59,61 @@ export class MongoUserRepository implements UserRepository {
     return updatedData;
   }
   async findall(): Promise<User[] | null> {
-    const usersData = await userModel.find();
+    const usersData = await userModel.find().sort({ createdAt: -1 });
     return usersData;
   }
   async delete(id: string): Promise<User | null> {
     const deletedUser = await userModel.findByIdAndDelete(id);
     return deletedUser;
+  }
+  async search(searchTerm: { [key: string]: string }): Promise<User[] | null> {
+    const { search, sort, filter, direction } = searchTerm;
+    
+    let query: any = {};
+
+    if (search) {
+      query.$or = [
+        { fname: { $regex: search, $options: "i" } },
+        { lname: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    if (filter === "Block") {
+      query.isBlocked = true;
+    } else if (filter === "Unblock") {
+      query.isBlocked = false;
+    } else if (filter === "All" || !filter) {
+    }
+
+    let sortOption = {};
+
+    if (sort === "First Name" && direction === "A to Z") {
+      sortOption = { fname: 1 };
+    } else if (sort === "First Name" && direction === "Z to A") {
+      sortOption = { fname: -1 };
+    } else if (sort === "Last Name" && direction === "A to Z") {
+      sortOption = { lname: 1 };
+    } else if (sort === "Last Name" && direction === "Z to A") {
+      sortOption = { lname: -1 };
+    } else if (sort === "Email" && direction === "A to Z") {
+      sortOption = { email: 1 };
+    } else if (sort === "Email" && direction === "Z to A") {
+      sortOption = { email: -1 };
+    } else {
+      sortOption = { createdAt: -1 };
+    }
+
+    const usersData = await userModel
+      .find({
+        role: { $ne: "admin" },
+        ...query,
+      })
+      .select("-password")
+      .sort(sortOption);
+
+      console.log("user data",usersData);
+      
+    return usersData;
   }
 }
