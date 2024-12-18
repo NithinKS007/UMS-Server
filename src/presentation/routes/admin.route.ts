@@ -2,7 +2,6 @@ import express from "express"
 import { AdminController } from "../controllers/admin.controller"
 import {isAuthenticated,isAdmin} from "../middleware/isAuthenticated"
 
-
 const adminRoute = express.Router()
 
 adminRoute.get("/users",isAuthenticated,isAdmin,AdminController.findallUsers)

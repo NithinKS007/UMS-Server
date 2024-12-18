@@ -7,7 +7,6 @@ import { UserController } from "../controllers/user.controller"
 
 const userRoute = express.Router()
 
-//routes common to admin and user 
 userRoute.post("/signup",signupValidation,validateRequest,AuthController.signup)
 userRoute.post("/signin",signinValidation,validateRequest,AuthController.signin)
 userRoute.post("/signout",isAuthenticated,AuthController.signout)

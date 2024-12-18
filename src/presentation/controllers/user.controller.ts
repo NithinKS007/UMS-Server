@@ -20,6 +20,9 @@ export class UserController {
 
       const userData = req.body;
 
+      console.log("data for updating",userData);
+      
+
       if (!user) {
         sendResponse(res, HTTP_STATUS_CODES.NOT_FOUND, null, "Access denied");
 
