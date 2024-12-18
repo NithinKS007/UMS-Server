@@ -3,6 +3,7 @@ import { JwtPayload } from "jsonwebtoken";
 import { Request } from "express";
 
 export interface userDTO {
+  id:string;
   fname: string;
   lname: string;
   email: string;
@@ -11,6 +12,9 @@ export interface userDTO {
   role?: UserRole;
   dateOfBirth?: Date;
   address?: string;
+  imageUrl?: string
+  designation?:string,
+  companyName?:string,
 }
 
 export type signinUserDTO = Pick<userDTO, "email" | "password">;
@@ -21,9 +25,6 @@ export interface UserPayLoadDTO extends JwtPayload {
   id: string;
   role: UserRole;
 }
-// export interface searchTermDTO {
-//   searchText: string;
-// }
 
 export interface IuserAuthInfoRequest extends Request {
   user?: UserPayLoadDTO;

@@ -10,7 +10,7 @@ import userModel from "../database/user.model";
 
 export class MongoUserRepository implements UserRepository {
   async signup(data: userDTO): Promise<User> {
-    const { fname, lname, email, phone, password, dateOfBirth, address, role } =
+    const { fname, lname, email, phone, password, dateOfBirth, address, role ,designation,companyName,imageUrl} =
       data;
 
     const user = new userModel({
@@ -22,6 +22,9 @@ export class MongoUserRepository implements UserRepository {
       role,
       dateOfBirth,
       address,
+      designation,
+      companyName,
+      imageUrl
     });
 
     return await user.save();
@@ -47,10 +50,10 @@ export class MongoUserRepository implements UserRepository {
   }
 
   async findById(id: string): Promise<User | null> {
-    return await userModel.findById(id);
+    return await userModel.findById(id).select("-password");
   }
 
-  async update(data: updateUserDTO, id: string): Promise<User | null> {
+  async update(id: string, data: updateUserDTO): Promise<User | null> {
     const updatedData = await userModel
       .findByIdAndUpdate(id, data, {
         new: true,
@@ -59,16 +62,21 @@ export class MongoUserRepository implements UserRepository {
     return updatedData;
   }
   async findall(): Promise<User[] | null> {
-    const usersData = await userModel.find().sort({ createdAt: -1 });
+    const usersData = await userModel
+      .find()
+      .sort({ createdAt: -1 })
+      .select("-password");
     return usersData;
   }
   async delete(id: string): Promise<User | null> {
-    const deletedUser = await userModel.findByIdAndDelete(id);
+    const deletedUser = await userModel
+      .findByIdAndDelete(id)
+      .select("-password");
     return deletedUser;
   }
   async search(searchTerm: { [key: string]: string }): Promise<User[] | null> {
     const { search, sort, filter, direction } = searchTerm;
-    
+
     let query: any = {};
 
     if (search) {
@@ -112,8 +120,15 @@ export class MongoUserRepository implements UserRepository {
       .select("-password")
       .sort(sortOption);
 
-      console.log("user data",usersData);
-      
     return usersData;
+  }
+
+  async updateUserBlockStatus(
+    id: string,
+    blockStatus: boolean
+  ): Promise<User | null> {
+    return await userModel
+      .findByIdAndUpdate(id, { isBlocked: blockStatus }, { new: true })
+      .select("-password");
   }
 }

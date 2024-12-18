@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import {  Response } from "express";
 import { sendResponse } from "../../shared/utils/http.response";
 import { HTTP_STATUS_CODES } from "../../shared/constants/http.status.codes";
 import { hashPassword } from "../../shared/utils/hash.password";
@@ -82,6 +82,17 @@ export class AuthController {
         return;
       }
 
+      if (user.isBlocked) {
+        sendResponse(
+          res,
+          HTTP_STATUS_CODES.FORBIDDEN,
+          null,
+          "Your account has been blocked"
+        );
+
+        return;
+      }
+
       const accessToken = generateAccessToken(user.id, user.role);
       const refreshToken = generateRefreshToken(user.id, user.role);
 
@@ -116,11 +127,23 @@ export class AuthController {
       );
     }
   }
-  static async signout(req: IuserAuthInfoRequest, res: Response): Promise<void> {
+  static async signout(
+    req: IuserAuthInfoRequest,
+    res: Response
+  ): Promise<void> {
     try {
+      const accessToken = req.cookies.accessToken;
+      const refreshToken = req.cookies.refreshToken;
+
+      console.log("cookies from signout", accessToken, "   ", refreshToken);
+
+      if (!accessToken || !refreshToken) {
+        res.status(403).json({ message: "No tokens found" });
+
+        return;
+      }
       res.clearCookie("accessToken");
       res.clearCookie("refreshToken");
-      console.log("after clearing cookie");
       sendResponse(res, HTTP_STATUS_CODES.ok, null, "Logout successful");
     } catch (error) {
       console.log(`Error in signout : ${error}`);
@@ -133,13 +156,16 @@ export class AuthController {
     }
   }
 
-  static generateRefreshToken = (req: IuserAuthInfoRequest, res: Response): void => {
+  static refreshAccessToken = (
+    req: IuserAuthInfoRequest,
+    res: Response
+  ): void => {
     const refreshToken = req.cookies.refreshToken;
 
     if (!refreshToken) {
       sendResponse(
         res,
-        HTTP_STATUS_CODES.BAD_REQUEST,
+        HTTP_STATUS_CODES.UNAUTHORIZED,
         null,
         "No refresh token provided"
       );
@@ -147,9 +173,9 @@ export class AuthController {
     }
 
     try {
-      const decoded = authenticateRefreshToken(refreshToken)
+      const decoded = authenticateRefreshToken(refreshToken);
 
-      const newAccessToken = generateAccessToken(decoded.id, decoded.role) ;
+      const newAccessToken = generateAccessToken(decoded.id, decoded.role);
 
       res.cookie("accessToken", newAccessToken, {
         httpOnly: true,

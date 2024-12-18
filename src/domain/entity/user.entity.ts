@@ -12,6 +12,9 @@ export interface User extends Document {
   role: UserRole;
   dateOfBirth?: Date;
   address?: string;
+  imageUrl?:  string ,
+  designation?:  string ,
+  companyName?: string ,
   createdAt?: Date;
   updatedAt?: Date;
 }

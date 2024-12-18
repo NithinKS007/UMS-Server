@@ -12,6 +12,7 @@ export const isAuthenticated = (
   res: Response,
   next: NextFunction
 ) => {
+  
   const token = req.cookies.accessToken;
 
   if (!token) {
@@ -21,7 +22,6 @@ export const isAuthenticated = (
 
   try {
     const decoded = authenticateAccessToken(token);
-
     req.user = decoded as UserPayLoadDTO;
     next();
   } catch (error) {

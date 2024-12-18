@@ -11,6 +11,9 @@ export interface UserDocument extends Document {
   role: UserRole;
   dateOfBirth?: Date;
   address?: string;
+  imageUrl?: string
+  designation?:string,
+  companyName?:string,
 }
 
 const UserSchema: Schema = new Schema(
@@ -29,6 +32,9 @@ const UserSchema: Schema = new Schema(
     },
     dateOfBirth: { type: Date },
     address: { type: String },
+    imageUrl: { type: String },
+    designation: { type: String },
+    companyName: { type: String },
   },
   { timestamps: true }
 );

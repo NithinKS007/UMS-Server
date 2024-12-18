@@ -7,13 +7,11 @@ import { UserController } from "../controllers/user.controller"
 
 const userRoute = express.Router()
 
+//routes common to admin and user 
 userRoute.post("/signup",signupValidation,validateRequest,AuthController.signup)
 userRoute.post("/signin",signinValidation,validateRequest,AuthController.signin)
-userRoute.post("/signout",isAuthenticated,isUser,AuthController.signout)
-userRoute.post("/refresh",AuthController.generateRefreshToken)
-
-userRoute.put("/update",isAuthenticated,isUser,UserController.updateuserProfile)
-
-
+userRoute.post("/signout",isAuthenticated,AuthController.signout)
+userRoute.post("/refresh",AuthController.refreshAccessToken)
+userRoute.put("/update",isAuthenticated,UserController.updateuserProfile)
 
 export default userRoute

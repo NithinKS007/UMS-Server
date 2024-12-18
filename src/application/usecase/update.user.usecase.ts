@@ -4,7 +4,7 @@ import { User } from "../../domain/entity/user.entity";
 
 export class UpdateUserUseCase {
   constructor(private userRepository: UserRepository) {}
-  async execute(data: updateUserDTO, id: string): Promise<User | null> {
-    return await this.userRepository.update(data, id);
+  async execute(id: string,data: updateUserDTO): Promise<User | null> {
+    return await this.userRepository.update(id,data);
   }
 }
