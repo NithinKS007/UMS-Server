@@ -54,8 +54,11 @@ export class MongoUserRepository implements UserRepository {
   }
 
   async update(id: string, data: updateUserDTO): Promise<User | null> {
+   
+    const {password,...otherData} = data
+
     const updatedData = await userModel
-      .findByIdAndUpdate(id, data, {
+      .findByIdAndUpdate(id, otherData, {
         new: true,
       })
       .select("-password");
